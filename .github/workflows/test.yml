@@ -1,0 +1,24 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
+      - run: brew audit --strict --online funsaized/tap/herdr-mise
+      - run: brew install --build-from-source funsaized/tap/herdr-mise
+      - run: brew test funsaized/tap/herdr-mise
+      - run: brew uninstall herdr-mise
