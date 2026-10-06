@@ -13,12 +13,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, macos-15-intel, ubuntu-24.04]
+        include:
+          - os: macos-15
+            install-flags: --build-from-source
+          # Homebrew no longer builds bottles for macOS Intel, so installing
+          # herdr there compiles LLVM, Rust and Zig from source and exceeds
+          # the job limit. The formula test does not need herdr, so test the
+          # Intel archive without dependencies.
+          - os: macos-15-intel
+            install-flags: --build-from-source --ignore-dependencies
+          - os: ubuntu-24.04
+            install-flags: --build-from-source
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
       - run: brew audit --strict --online funsaized/tap/herdr-mise
-      - run: brew install --build-from-source funsaized/tap/herdr-mise
+      - run: brew install ${{ matrix.install-flags }} funsaized/tap/herdr-mise
       - run: brew test funsaized/tap/herdr-mise
       - run: brew uninstall herdr-mise
