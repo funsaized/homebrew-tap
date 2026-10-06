@@ -13,12 +13,43 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, macos-15-intel, ubuntu-24.04]
+        include:
+          - os: macos-15
+            install-flags: --build-from-source
+          # Homebrew no longer builds bottles for macOS Intel, so installing
+          # herdr there compiles LLVM, Rust and Zig from source and exceeds
+          # the job limit. Install the Intel archive without dependencies;
+          # brew test refuses to run without herdr, so smoke it directly.
+          - os: macos-15-intel
+            install-flags: --build-from-source --ignore-dependencies
+            smoke-only: true
+          - os: ubuntu-24.04
+            install-flags: --build-from-source
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
       - run: brew audit --strict --online funsaized/tap/herdr-mise
-      - run: brew install --build-from-source funsaized/tap/herdr-mise
-      - run: brew test funsaized/tap/herdr-mise
+      - run: brew install ${{ matrix.install-flags }} funsaized/tap/herdr-mise
+      - if: ${{ !matrix.smoke-only }}
+        run: brew test funsaized/tap/herdr-mise
+      # Mirrors the formula's test block.
+      - if: ${{ matrix.smoke-only }}
+        run: |
+          port=48731
+          mkdir -p "$RUNNER_TEMP/home" "$RUNNER_TEMP/config" "$RUNNER_TEMP/data"
+          HOME="$RUNNER_TEMP/home" XDG_CONFIG_HOME="$RUNNER_TEMP/config" \
+            XDG_DATA_HOME="$RUNNER_TEMP/data" HERDR_MISE_PORT="$port" \
+            HERDR_SOCKET_PATH="$RUNNER_TEMP/missing.sock" \
+            "$(brew --prefix)/bin/herdr-mise" &
+          pid=$!
+          body=
+          for _ in $(seq 30); do
+            body=$(curl -fsS "http://127.0.0.1:$port/") && break
+            sleep 0.2
+          done
+          kill -TERM "$pid"
+          wait "$pid" || true
+          grep -Eq 'assets/index-[^"'"'"']+\.js' <<<"$body"
       - run: brew uninstall herdr-mise
