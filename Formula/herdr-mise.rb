@@ -7,14 +7,14 @@ class HerdrMise < Formula
   depends_on "herdr"
 
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/funsaized/herdr-mise/releases/download/v0.5.1/herdr-mise-v0.5.1-aarch64-apple-darwin.tar.gz"
-    sha256 "5e0a02d94c739668d8edff55b5670292314abf64b14e81d7acbf820f102841b0"
+    url "https://github.com/funsaized/herdr-mise/releases/download/v0.5.2/herdr-mise-v0.5.2-aarch64-apple-darwin.tar.gz"
+    sha256 "1212aa641ba39ce2be61fd0ba419cf22d60e6921c33367d70727ed81ffb5ccda"
   elsif OS.mac?
-    url "https://github.com/funsaized/herdr-mise/releases/download/v0.5.1/herdr-mise-v0.5.1-x86_64-apple-darwin.tar.gz"
-    sha256 "9e15e1823f706a3c073ca2c1a3873ccd77a27f520b5ab4b39dfb65e570ce4ce0"
+    url "https://github.com/funsaized/herdr-mise/releases/download/v0.5.2/herdr-mise-v0.5.2-x86_64-apple-darwin.tar.gz"
+    sha256 "06db69309e9057bb63e9958b72fd9e9d77f0c6f2f442c3c506ef025853c49d50"
   else
-    url "https://github.com/funsaized/herdr-mise/releases/download/v0.5.1/herdr-mise-v0.5.1-x86_64-unknown-linux-gnu.tar.gz"
-    sha256 "7baccb695f831d97234fcb1e8555af3f0da1e7bb19856dd2394921bc71339061"
+    url "https://github.com/funsaized/herdr-mise/releases/download/v0.5.2/herdr-mise-v0.5.2-x86_64-unknown-linux-gnu.tar.gz"
+    sha256 "a534405486538c54759f1ff45785c4ecab552a838badab914a177e38cf6439d3"
   end
 
   on_linux do
